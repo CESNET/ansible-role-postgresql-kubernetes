@@ -51,7 +51,7 @@
     - s3-objectstore.yaml
     - s3-secret.yaml
   ansible.builtin.template:
-    src: "templates/{{ chart_name }}/{{ item }}.j2"
+    src: "templates/{{ item }}.j2"
     dest: "{{ chart_path }}/templates/{{ item }}"
 
 - name: "apply chart"
