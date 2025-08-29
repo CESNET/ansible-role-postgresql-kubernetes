@@ -1,0 +1,61 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: "{{ cnpg_cluster_name }}"
+  namespace: "{{ k8s_namespace }}"
+  annotations:
+    field.cattle.io/description: "CloudNativePG database cluster {{ cnpg_cluster_name }}"
+spec:
+  instances: {{ cnpg_cluster_instances }}
+  enableSuperuserAccess: {{ cnpg_cluster_enable_superuser_access }}
+  imageName: "{{ cnpg_cluster_image }}"
+  primaryUpdateStrategy: unsupervised
+  primaryUpdateMethod: switchover
+  postgresql:
+    parameters:
+      wal_keep_size: "{{ cnpg_cluster_wal_keep_size }}"
+      timezone: "{{ cnpg_cluster_db_timezone }}"
+      # activates pg_stat_statements extension and sets shared_preload_libraries, see
+      # https://cloudnative-pg.io/documentation/current/postgresql_conf/#enabling-pg_stat_statements
+      # https://www.postgresql.org/docs/current/pgstatstatements.html#PGSTATSTATEMENTS-CONFIG-PARAMS
+      pg_stat_statements.track: top
+      pg_stat_statements.max: "5000"
+  replicationSlots:
+    highAvailability:
+      enabled: true
+  env: # fix breaking change in AWS client that introduced incompatibility in checksums
+    - name: AWS_REQUEST_CHECKSUM_CALCULATION
+      value: when_required
+    - name: AWS_RESPONSE_CHECKSUM_VALIDATION
+      value: when_required
+    - name: AWS_NO_CHUNKED_ENCODING
+      value: "true"
+  bootstrap:
+    initdb:
+      # see https://cloudnative-pg.io/documentation/1.26/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapInitDB
+      database: "{{ cnpg_cluster_db_name }}"
+      owner: "{{ cnpg_cluster_db_owner }}"
+      secret:
+        name: "{{ cnpg_cluster_name }}-app"
+      # https://cloudnative-pg.io/documentation/current/bootstrap/#the-bootstrap-section
+      postInitApplicationSQLRefs:
+        secretRefs:
+          - name: "{{ cnpg_cluster_name }}-app"
+            key: postInitAppSQL
+  resources:
+    requests:
+      memory: "{{ cnpg_cluster_requests_mem }}"
+      cpu: "{{ cnpg_cluster_requests_cpu}}"
+    limits:
+      memory: "{{ cnpg_cluster_limits_mem }}"
+      cpu: "{{ cnpg_cluster_limits_cpu }}"
+  storage:
+    size: "{{ cnpg_cluster_storage_size }}"
+    storageClass: zfs-csi
+  # backup new plugin way
+  plugins:
+    - name: barman-cloud.cloudnative-pg.io
+      isWALArchiver: true
+      parameters:
+        barmanObjectName: "s3-{{ cnpg_cluster_s3_bucket }}"
+        serverName: "{{ cnpg_cluster_name }}"

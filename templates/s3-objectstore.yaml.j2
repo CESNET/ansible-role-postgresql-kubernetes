@@ -1,0 +1,38 @@
+apiVersion: barmancloud.cnpg.io/v1
+kind: ObjectStore
+metadata:
+  name: "s3-{{ cnpg_cluster_s3_bucket }}"
+  namespace: "{{ k8s_namespace }}"
+  annotations:
+    field.cattle.io/description: "ObjectStore for backups to S3 bucket {{ cnpg_cluster_s3_bucket }}"
+spec:
+  retentionPolicy: "{{ cnpg_cluster_retention_policy }}"
+  instanceSidecarConfiguration:
+    resources:
+      requests:
+        memory: "{{ cnpg_sidecar_requests_mem }}"
+        cpu: "{{ cnpg_sidecar_requests_cpu}}"
+      limits:
+        memory: "{{ cnpg_sidecar_limits_mem }}"
+        cpu: "{{ cnpg_sidecar_limits_cpu }}"
+    env: # fix breaking change in AWS client that introduced incompatibility in checksums
+      - name: AWS_REQUEST_CHECKSUM_CALCULATION
+        value: when_required
+      - name: AWS_RESPONSE_CHECKSUM_VALIDATION
+        value: when_required
+      - name: AWS_NO_CHUNKED_ENCODING
+        value: "true"
+  configuration:
+    destinationPath: "s3://{{ cnpg_cluster_s3_bucket }}/"
+    endpointURL: "{{ cnpg_cluster_aws_endpointURL }}"
+    s3Credentials:
+      accessKeyId:
+        name: s3-creds
+        key: ACCESS_KEY_ID
+      secretAccessKey:
+        name: s3-creds
+        key: ACCESS_SECRET_KEY
+    wal:
+      compression: "{{ cnpg_cluster_backup_compression }}"
+    data:
+      compression: "{{ cnpg_cluster_backup_compression }}"

@@ -1,0 +1,102 @@
+- name: "check defined variables"
+  assert:
+    that:
+      - k8s_context is defined
+      - k8s_namespace is defined
+      - cnpg_cluster_name is defined
+      - cnpg_cluster_s3_bucket is defined
+      - cnpg_cluster_user_password is defined
+      - cnpg_cluster_pgwatch_user_password is defined
+      - cnpg_cluster_aws_access_key_id is defined
+      - cnpg_cluster_aws_secret_access_key is defined
+
+- name: "create S3 bucket {{ cnpg_cluster_s3_bucket }}"
+  amazon.aws.s3_bucket:
+    name: "{{ cnpg_cluster_s3_bucket }}"
+    aws_access_key_id: "{{ cnpg_cluster_aws_access_key_id }}"
+    aws_secret_access_key: "{{ cnpg_cluster_aws_secret_access_key }}"
+    aws_endpoint_url: "{{ cnpg_cluster_aws_endpointURL }}"
+    aws_region: "{{ cnpg_cluster_aws_region }}"
+    state: present
+
+- name: "compute temporary chart directory name"
+  set_fact:
+    chart_path: "localcharts/{{ chart_name }}-{{ inventory_hostname }}"
+
+- name: "create directories for temporary chart"
+  loop:
+    - "{{ chart_path }}"
+    - "{{ chart_path }}/templates"
+  file:
+    state: directory
+    path: "{{ item }}"
+
+- name: "generate Chart.yaml file"
+  ansible.builtin.template:
+    src: "templates/Chart.yaml.j2"
+    dest: "{{ chart_path }}/Chart.yaml"
+
+- name: "generate values.yaml file"
+  ansible.builtin.template:
+    src: "templates/values.yaml.j2"
+    dest: "{{ chart_path }}/values.yaml"
+
+- name: "generate YAML files in templates/ directory"
+  loop:
+    - cluster.yaml
+    - cluster-lb-rw.yaml
+    - cluster-network-policy.yaml
+    - cluster-scheduled-backup.yaml
+    - cluster-secret-app.yaml
+    - s3-objectstore.yaml
+    - s3-secret.yaml
+  ansible.builtin.template:
+    src: "templates/{{ chart_name }}/{{ item }}.j2"
+    dest: "{{ chart_path }}/templates/{{ item }}"
+
+- name: "apply chart"
+  kubernetes.core.helm:
+    chart_ref: "{{ chart_path }}"
+    release_name: "{{ cnpg_cluster_name }}"
+    release_namespace: "{{ k8s_namespace }}"
+    kube_context: "{{ k8s_context }}"
+    release_state: present
+
+- name: "check db cluster is ready"
+  kubernetes.core.k8s_info:
+    kind: Cluster
+    name: "{{ cnpg_cluster_name }}"
+    namespace: "{{ k8s_namespace }}"
+    context: "{{ k8s_context }}"
+    wait: true
+    wait_condition:
+      type: Ready
+      reason: ClusterIsReady
+  register: cluster_info
+
+- name: "check db cluster is archiving"
+  set_fact:
+    condition_archiving: "{{ cluster_info.resources[0].status|community.general.json_query('conditions[?type==`ContinuousArchiving`]') }}"
+- name: "fail if cluster is not archiving"
+  when: not condition_archiving[0].status=="True"
+  fail:
+    msg: "cluster backup is not working: {{ condition_archiving.message }}"
+
+- name: "print external JDBC URL"
+  debug:
+    msg: "jdbc:postgresql://{{ cnpg_cluster_db_owner }}@{{ cnpg_cluster_name }}-lb-rw.dyn.cloud.e-infra.cz:5432/{{ cnpg_cluster_db_name }}"
+
+- name: "delete secrets"
+  when: chart_clean_up_secrets
+  loop:
+    - cluster-secret-app.yaml
+    - s3-secret.yaml
+  file:
+    state: absent
+    path: "{{ chart_path }}/templates/{{ item }}"
+
+- name: "delete temporary chart"
+  when: chart_clean_up_helm_dir
+  file:
+    state: absent
+    path: "{{ chart_path }}"
