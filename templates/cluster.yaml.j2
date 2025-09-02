@@ -12,6 +12,12 @@ spec:
   primaryUpdateStrategy: unsupervised
   primaryUpdateMethod: switchover
   postgresql:
+{% if cnpg_cluster_synchronous is defined %}
+    synchronous:
+    {%- for p in cnpg_cluster_synchronous| dict2items +%}
+      {{ p.key }}: {{ p.value }}
+    {%- endfor +%}
+{% endif %}
     # https://cloudnative-pg.io/documentation/1.26/postgresql_conf/#the-postgresql-section
     parameters:
       wal_keep_size: "{{ cnpg_cluster_wal_keep_size }}"
@@ -22,9 +28,9 @@ spec:
       pg_stat_statements.track: top
       pg_stat_statements.max: "5000"
       # additional parameters going into custom.conf
-{%  for p in cnpg_cluster_postgresql_parameters| dict2items %}
+    {%- for p in cnpg_cluster_postgresql_parameters| dict2items +%}
       {{ p.key }}: "{{ p.value }}"
-{% endfor %}
+    {%- endfor +%}
   replicationSlots:
     highAvailability:
       enabled: true
@@ -33,9 +39,9 @@ spec:
       # see https://cloudnative-pg.io/documentation/1.26/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapInitDB
       database: "{{ cnpg_cluster_db_name }}"
       owner: "{{ cnpg_cluster_db_owner }}"
-{%  for p in cnpg_cluster_db_parameters| dict2items %}
+    {%- for p in cnpg_cluster_db_parameters| dict2items +%}
       {{ p.key }}: "{{ p.value }}"
-{% endfor %}
+    {%- endfor +%}
       secret:
         name: "{{ cnpg_cluster_name }}-app"
       # https://cloudnative-pg.io/documentation/current/bootstrap/#the-bootstrap-section

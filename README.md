@@ -51,7 +51,8 @@ Role Variables
 - **cnpg_cluster_full_backup_schedule** — [cron schedule](https://pkg.go.dev/github.com/robfig/cron#hdr-CRON_Expression_Format) for full backups, in UTC timezone
 - **cnpg_cluster_backup_compression** — [compression algorithm](https://cloudnative-pg.io/plugin-barman-cloud/docs/compression/) for both full backups and WAL
 - **cnpg_cluster_ready_wait_seconds** — how many seconds to wait for cluster to become ready, default is 400 seconds
- 
+- **cnpg_cluster_synchronous** — if defined, its content is added as spec/synchronous, see [Synchronous Replication](https://cloudnative-pg.io/documentation/1.26/replication/#synchronous-replication) 
+
 Example
 -------
 ```yaml
@@ -77,6 +78,10 @@ Example
           max_pred_locks_per_transaction: 8192
           shared_buffers: 256MB
         cnpg_cluster_storage_size: 20Gi
+        cnpg_cluster_synchronous:
+          method: any
+          number: 1
+          dataDurability: preferred
         cnpg_cluster_image: ghcr.io/cloudnative-pg/postgresql:17.6-4-bookworm
         cnpg_cluster_s3_bucket: mydbbackups
         cnpg_cluster_user_password: "{{ user_password_vault }}"
