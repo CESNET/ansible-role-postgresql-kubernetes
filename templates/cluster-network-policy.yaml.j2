@@ -19,7 +19,7 @@ spec:
         - namespaceSelector:
             matchLabels:
               kubernetes.io/metadata.name: "{{ k8s_namespace }}"
-{% for p in cnpg_cluster_firewall_ports %}
+{% for p in cnpg_cluster_firewall_ports + cnpg_cluster_firewall_additional_ports %}
         - ipBlock: # {{ p.comment }}
             cidr: {{ p.ipv4 if p.ipv4 is defined else p.ipv6 }}
 {% endfor %}

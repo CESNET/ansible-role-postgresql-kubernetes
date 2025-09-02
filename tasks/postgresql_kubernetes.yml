@@ -69,6 +69,7 @@
     namespace: "{{ k8s_namespace }}"
     context: "{{ k8s_context }}"
     wait: true
+    wait_timeout: "{{ cnpg_cluster_ready_wait_seconds }}"
     wait_condition:
       type: Ready
       reason: ClusterIsReady
