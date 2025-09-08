@@ -1,4 +1,4 @@
-cnpg_cluster_image: "ghcr.io/cloudnative-pg/postgresql:latest"
+cnpg_cluster_image: "ghcr.io/cloudnative-pg/postgresql:17.6-standard-trixie"
 cnpg_cluster_db_name: app
 cnpg_cluster_db_owner: "{{ cnpg_cluster_db_name }}"
 cnpg_cluster_db_parameters: {}
@@ -11,10 +11,10 @@ cnpg_cluster_requests_mem: 2Gi
 cnpg_cluster_requests_cpu: 500m
 cnpg_cluster_limits_mem: 3Gi
 cnpg_cluster_limits_cpu: 1
-cnpg_sidecar_requests_mem: "{{ cnpg_cluster_requests_mem }}"
-cnpg_sidecar_requests_cpu: "{{cnpg_cluster_requests_cpu }}"
-cnpg_sidecar_limits_mem: "{{ cnpg_cluster_limits_mem }}"
-cnpg_sidecar_limits_cpu: "{{ cnpg_cluster_limits_cpu }}"
+cnpg_sidecar_requests_mem: 2Gi
+cnpg_sidecar_requests_cpu: 500m
+cnpg_sidecar_limits_mem: 3Gi
+cnpg_sidecar_limits_cpu: 1
 cnpg_cluster_retention_policy: 3d
 cnpg_cluster_instances: 3
 cnpg_cluster_firewall_ports:
@@ -36,6 +36,6 @@ cnpg_cluster_backup_compression: bzip2
 chart_name: cnpgchart
 chart_version: 1.1.0
 chart_description: CloudNativePG Cluster chart
-chart_app_version: 1.26.0
+chart_app_version: 1.27.0
 chart_clean_up_helm_dir: false
 chart_clean_up_secrets: true
