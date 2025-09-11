@@ -10,13 +10,20 @@
       - cnpg_cluster_aws_access_key_id is defined
       - cnpg_cluster_aws_secret_access_key is defined
 
+- name: "set helm chart metadata"
+  set_fact:
+    chart_name: cnpgchart
+    chart_version: 1.1.0
+    chart_description: CloudNativePG Cluster chart
+    chart_app_version: 1.27.0
+
 - name: "create S3 bucket {{ cnpg_cluster_s3_bucket }}"
   amazon.aws.s3_bucket:
     name: "{{ cnpg_cluster_s3_bucket }}"
-    aws_access_key_id: "{{ cnpg_cluster_aws_access_key_id }}"
-    aws_secret_access_key: "{{ cnpg_cluster_aws_secret_access_key }}"
-    aws_endpoint_url: "{{ cnpg_cluster_aws_endpointURL }}"
-    aws_region: "{{ cnpg_cluster_aws_region }}"
+    access_key: "{{ cnpg_cluster_aws_access_key_id }}"
+    secret_key: "{{ cnpg_cluster_aws_secret_access_key }}"
+    endpoint_url: "{{ cnpg_cluster_aws_endpointURL }}"
+    region: "{{ cnpg_cluster_aws_region }}"
     state: present
 
 - name: "compute temporary chart directory name"
@@ -59,7 +66,7 @@
     chart_ref: "{{ chart_path }}"
     release_name: "{{ cnpg_cluster_name }}"
     release_namespace: "{{ k8s_namespace }}"
-    kube_context: "{{ k8s_context }}"
+    context: "{{ k8s_context }}"
     release_state: present
 
 - name: "check db cluster is ready"
