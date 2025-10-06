@@ -52,6 +52,8 @@ Role Variables
 - **cnpg_cluster_backup_compression** — [compression algorithm](https://cloudnative-pg.io/plugin-barman-cloud/docs/compression/) for both full backups and WAL
 - **cnpg_cluster_ready_wait_seconds** — how many seconds to wait for cluster to become ready, default is 400 seconds
 - **cnpg_cluster_synchronous** — if defined, its content is added as spec/synchronous, see [Synchronous Replication](https://cloudnative-pg.io/documentation/1.26/replication/#synchronous-replication) 
+- **cnpg_cluster_recovery** — if true, do a recovery from an S3 bucket specified by the `cnpg_cluster_s3_recovery_bucket` variable, default is false
+- **cnpg_cluster_s3_recovery_bucket** — the name of the S3 bucket with backup files, default is undefined 
 
 Example
 -------
@@ -89,3 +91,29 @@ Example
         cnpg_cluster_aws_access_key_id: "{{ aws_access_key_id_vault }}"
         cnpg_cluster_aws_secret_access_key: "{{ aws_secret_access_key_vault }}"
 ```
+
+Database recovery
+-----------------
+The database cluster stores backups (both full backups once a day and WAL files every 5 minutes) in an S3 bucket
+with the name defined in the `cnpg_cluster_s3_bucket` variable. If you need to recover a lost cluster from the backup,
+create a playbook like this:
+```yaml
+- name: "recover CNPG cluster from an S3 backup"
+  hosts:
+    - my-ns
+  connection: local
+  gather_facts: no
+  vars:
+    cnpg_cluster_recovery: true
+    cnpg_cluster_s3_recovery_bucket: mydbbackups
+    cnpg_cluster_s3_bucket: mydbbackups2
+  tasks:
+    - import_role:
+        name: cesnet.postgresql_kubernetes
+```
+The variable `cnpg_cluster_s3_recovery_bucket` must contain the name of the S3 bucket containing the backups
+to recover from, and the variable `cnpg_cluster_s3_bucket` must contain the name of a non-existing or empty bucket 
+where new logs will be written after the recovery. You cannot reuse the old bucket. 
+
+After the cluster is recovered, you can run the original playbook again to replace the recovery settings with normal
+settings, just do not forget to change the `cnpg_cluster_s3_bucket` to the new bucket.

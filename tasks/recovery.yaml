@@ -1,0 +1,65 @@
+
+- name: "old S3 bucket with existing backups must exist"
+  block:
+    - name: "check recovery bucket name"
+      assert:
+        that: cnpg_cluster_s3_recovery_bucket is defined
+        fail_msg: "variable cnpg_cluster_s3_recovery_bucket must be defined and contain the bucket with backups"
+
+    - name: "get recovery bucket info"
+      amazon.aws.s3_bucket_info:
+        name: "{{ cnpg_cluster_s3_recovery_bucket }}"
+      register: bucket_recovery
+
+    - name: "check bucket existence"
+      assert:
+        that: bucket_recovery.buckets | length > 0
+        fail_msg: "bucket s3://{{ cnpg_cluster_s3_recovery_bucket }} not found"
+
+    - name: "get directory with old backups"
+      amazon.aws.s3_object_info:
+        bucket_name: "{{ cnpg_cluster_s3_recovery_bucket }}"
+        prefix: "{{ cnpg_cluster_name }}"
+      register: dir_info
+
+    - name: "check dir is not empty"
+      assert:
+        that: dir_info.s3_keys | length > 0
+        fail_msg: "directory s3://{{ cnpg_cluster_s3_recovery_bucket }}/{{ cnpg_cluster_name }}/ must contain backups"
+
+    - name: "backup files"
+      debug:
+        var: dir_info.s3_keys
+
+- name: "new empty S3 bucket for new backups must exist"
+  block:
+    - name: "get backup bucket info"
+      amazon.aws.s3_bucket_info:
+        name: "{{ cnpg_cluster_s3_bucket }}"
+      register: bucket_backup
+
+    - name: "create S3 bucket for backup"
+      when: not bucket_backup.buckets
+      amazon.aws.s3_bucket:
+        name: "{{ cnpg_cluster_s3_bucket }}"
+
+    - name: "get directory for new backups"
+      when: bucket_backup.buckets | length > 0
+      amazon.aws.s3_object_info:
+        bucket_name: "{{ cnpg_cluster_s3_bucket }}"
+        prefix: "{{ cnpg_cluster_name }}"
+      register: dir_info
+
+    - name: "check empty dir in bucket"
+      when: dir_info.s3_keys | length > 0
+      fail:
+        msg: "The dir s3://{{ cnpg_cluster_s3_bucket }}/{{ cnpg_cluster_name }} is not empty. Choose other backup bucket."
+
+
+- name: "recovery ObjectStore"
+  when: cnpg_cluster_recovery
+  ansible.builtin.template:
+    src: "templates/s3-objectstore.yaml.j2"
+    dest: "{{ chart_path }}/templates/s3-recovery-objectstore.yaml"
+  vars:
+    cnpg_cluster_s3_bucket: "{{ cnpg_cluster_s3_recovery_bucket }}"

@@ -18,7 +18,7 @@ spec:
       {{ p.key }}: {{ p.value }}
     {%- endfor +%}
 {% endif %}
-    # https://cloudnative-pg.io/documentation/1.26/postgresql_conf/#the-postgresql-section
+    # https://cloudnative-pg.io/documentation/1.27/postgresql_conf/#the-postgresql-section
     parameters:
       wal_keep_size: "{{ cnpg_cluster_wal_keep_size }}"
       timezone: "{{ cnpg_cluster_postgresql_timezone }}"
@@ -35,8 +35,10 @@ spec:
     highAvailability:
       enabled: true
   bootstrap:
+{% if not cnpg_cluster_recovery %}
+    # new database
     initdb:
-      # see https://cloudnative-pg.io/documentation/1.26/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapInitDB
+      # see https://cloudnative-pg.io/documentation/1.27/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapInitDB
       database: "{{ cnpg_cluster_db_name }}"
       owner: "{{ cnpg_cluster_db_owner }}"
     {%- for p in cnpg_cluster_db_parameters| dict2items +%}
@@ -49,6 +51,24 @@ spec:
         secretRefs:
           - name: "{{ cnpg_cluster_name }}-app"
             key: postInitAppSQL
+{% else %}
+    # database recovered from S3 backup
+    recovery:
+        # see https://cloudnative-pg.io/documentation/1.27/cloudnative-pg.v1/#postgresql-cnpg-io-v1-BootstrapRecovery
+        source: "{{ cnpg_cluster_name }}"
+        database: "{{ cnpg_cluster_db_name }}"
+        owner: "{{ cnpg_cluster_db_owner }}"
+        secret:
+            name: "{{ cnpg_cluster_name }}-app"
+  externalClusters:
+        - name: "{{ cnpg_cluster_name }}"
+          plugin:
+              name: barman-cloud.cloudnative-pg.io
+              isWALArchiver: true
+              parameters:
+                  barmanObjectName: "s3-{{ cnpg_cluster_s3_recovery_bucket }}"
+                  serverName: "{{ cnpg_cluster_name }}"
+{% endif %}
   resources:
     requests:
       memory: "{{ cnpg_cluster_requests_mem }}"
