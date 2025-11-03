@@ -1,4 +1,4 @@
-cnpg_cluster_image: "ghcr.io/cloudnative-pg/postgresql:17.6-standard-trixie"
+cnpg_cluster_image: "ghcr.io/cloudnative-pg/postgresql:18.0-standard-trixie"
 cnpg_cluster_db_name: app
 cnpg_cluster_db_owner: "{{ cnpg_cluster_db_name }}"
 cnpg_cluster_db_parameters: {}
@@ -24,6 +24,10 @@ cnpg_cluster_firewall_ports:
   - { port: 5432, ipv4: "78.128.247.175/32", comment: "accept postgres from CESNET eduVPN IPv4" }
   - { port: 5432, ipv6: "2001:718:ff05:acb::/64", comment: "accept postgres from CESNET eduVPN IPv6" }
   - { port: 5432, ipv6: "2001:718:ff05:acc::/64", comment: "accept postgres from CESNET eduVPN IPv6" }
+  - { port: 5432, ipv4: "195.113.196.6/32", comment: "accept postgres from CESNET 712 IPv4" }
+  - { port: 5432, ipv4: "195.113.196.134/32", comment: "accept postgres from CESNET 712 IPv4" }
+  - { port: 5432, ipv6: "2001:718:ff05:acb:a00:c4:6:0/112", comment: "accept postgres from CESNET 712 IPv6" }
+  - { port: 5432, ipv6: "2001:718:ff05:acc:b00:c4:86:0/112", comment: "accept postgres from CESNET 712 IPv6" }
   - { port: 5432, ipv4: "78.128.247.148/32", comment: "accept postgres from psql-monitoring.perun-aai.org" }
   - { port: 5432, ipv6: "2001:718:ff05:206::148/128", comment: "accept postgres from psql-monitoring.perun-aai.org" }
 cnpg_cluster_firewall_additional_ports: []
