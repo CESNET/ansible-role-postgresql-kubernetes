@@ -13,7 +13,7 @@
 - name: "set helm chart metadata"
   set_fact:
     chart_name: cnpgchart
-    chart_version: 1.2.3
+    chart_version: 1.2.5
     chart_description: CloudNativePG Cluster chart
     chart_app_version: 1.27.0
 

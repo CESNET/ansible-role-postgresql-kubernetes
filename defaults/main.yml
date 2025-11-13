@@ -35,7 +35,8 @@ cnpg_cluster_wal_keep_size: 2GB
 cnpg_cluster_full_backup_schedule:  "0 0 0 * * *"  # https://pkg.go.dev/github.com/robfig/cron#hdr-CRON_Expression_Format
 cnpg_cluster_aws_endpointURL: "https://s3.cl4.du.cesnet.cz"
 cnpg_cluster_aws_region: "us-east-1"
-cnpg_cluster_backup_compression: bzip2
+cnpg_cluster_backup_wal_compression: zstd
+cnpg_cluster_backup_data_compression: snappy
 cnpg_cluster_recovery: false
 
 

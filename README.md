@@ -49,7 +49,8 @@ Role Variables
 - **cnpg_cluster_aws_secret_access_key** — S3 access key secret
 - **cnpg_cluster_aws_endpointURL** — S3 endpointURL
 - **cnpg_cluster_full_backup_schedule** — [cron schedule](https://pkg.go.dev/github.com/robfig/cron#hdr-CRON_Expression_Format) for full backups, in UTC timezone
-- **cnpg_cluster_backup_compression** — [compression algorithm](https://cloudnative-pg.io/plugin-barman-cloud/docs/compression/) for both full backups and WAL
+- **cnpg_cluster_backup_wal_compression** — [compression algorithm](https://cloudnative-pg.io/plugin-barman-cloud/docs/compression/) for WAL files (default zstd)
+- **cnpg_cluster_backup_data_compression** — [compression algorithm](https://cloudnative-pg.io/plugin-barman-cloud/docs/compression/) for full backups (default snappy)
 - **cnpg_cluster_ready_wait_seconds** — how many seconds to wait for cluster to become ready, default is 400 seconds
 - **cnpg_cluster_synchronous** — if defined, its content is added as spec/synchronous, see [Synchronous Replication](https://cloudnative-pg.io/documentation/1.26/replication/#synchronous-replication) 
 - **cnpg_cluster_recovery** — if true, do a recovery from an S3 bucket specified by the `cnpg_cluster_s3_recovery_bucket` variable, default is false
@@ -117,3 +118,27 @@ where new logs will be written after the recovery. You cannot reuse the old buck
 
 After the cluster is recovered, you can run the original playbook again to replace the recovery settings with normal
 settings, just do not forget to change the `cnpg_cluster_s3_bucket` to the new bucket.
+
+Backup compression
+------------------
+Full backups can be compressed by three algorithms only. A 10GB backup was compressed to:
+
+| algorithm | compress time | decompress time | size | ratio |
+|:---------:|:-------------:|:---------------:|:----:|:-----:|
+|     bzip2 |         422 s |           188 s | 2.1G | 4.7:1 |
+|      gzip |         157 s |            46 s | 2.6G | 3.8:1 |
+|    snappy |          15 s |            15 s | 3.5G | 2.8:1 |
+
+WAL files have wider selection of algorithms. An uncompressed WAL file of the size 16777216 bytes was compressed to: 
+
+| algorithm |  time  |  size  | ratio  |
+|:---------:|:------:|:------:|--------|
+|    snappy | 0.008s | 792065 | 21:1   |
+|       lz4 | 0.019s |  71331 | 235:1  |
+|      gzip | 0.064s |  19999 | 838:1  |
+|        xz | 0.217s |   4440 | 3778:1 |
+|      zstd | 0.021s |   3702 | 4531:1 |
+|  zstd -10 | 0.044s |   3407 | 4924:1 |
+|     bzip2 | 0.100s |   2907 | 5771:1 |
+
+The default algorithms were selected to be snappy and zstd because of fast compression times with reasonable compression ratio.

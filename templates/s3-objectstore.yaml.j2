@@ -33,6 +33,6 @@ spec:
         name: s3-creds
         key: ACCESS_SECRET_KEY
     wal:
-      compression: "{{ cnpg_cluster_backup_compression }}"
+      compression: "{{ cnpg_cluster_backup_wal_compression }}"
     data:
-      compression: "{{ cnpg_cluster_backup_compression }}"
+      compression: "{{ cnpg_cluster_backup_data_compression }}"
