@@ -4,9 +4,9 @@ metadata:
   name: "{{ cnpg_cluster_name }}-lb-rw"
   namespace: "{{ k8s_namespace }}"
   annotations:
-    field.cattle.io/description: "exposing CloudNativePG cluster at {{ cnpg_cluster_name }}-lb-rw.dyn.cloud.e-infra.cz"
+    field.cattle.io/description: "exposing CloudNativePG cluster at {{ cnpg_cluster_external_hostname }}"
     metallb.io/address-pool: default
-    external-dns.alpha.kubernetes.io/hostname: "{{ cnpg_cluster_name }}-lb-rw.dyn.cloud.e-infra.cz"
+    external-dns.alpha.kubernetes.io/hostname: "{{ cnpg_cluster_external_hostname }}"
 spec:
   type: LoadBalancer
   externalTrafficPolicy: Local

@@ -4,7 +4,7 @@ metadata:
   name: "{{ cnpg_cluster_name }}-network-policy"
   namespace: "{{ k8s_namespace }}"
   annotations:
-    field.cattle.io/description: "firewall for {{ cnpg_cluster_name }}-lb-rw.dyn.cloud.e-infra.cz"
+    field.cattle.io/description: "firewall for CNPG cluster {{ cnpg_cluster_name }}"
 spec:
   podSelector:
     matchLabels:

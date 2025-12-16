@@ -13,7 +13,7 @@
 - name: "set helm chart metadata"
   set_fact:
     chart_name: cnpgchart
-    chart_version: 1.2.5
+    chart_version: 1.2.6
     chart_description: CloudNativePG Cluster chart
     chart_app_version: 1.27.0
 
@@ -102,7 +102,7 @@
 
 - name: "print external JDBC URL"
   debug:
-    msg: "jdbc:postgresql://{{ cnpg_cluster_db_owner }}@{{ cnpg_cluster_name }}-lb-rw.dyn.cloud.e-infra.cz:5432/{{ cnpg_cluster_db_name }}"
+    msg: "jdbc:postgresql://{{ cnpg_cluster_db_owner }}@{{ cnpg_cluster_external_hostname }}:5432/{{ cnpg_cluster_db_name }}"
 
 - name: "delete secrets"
   when: chart_clean_up_secrets

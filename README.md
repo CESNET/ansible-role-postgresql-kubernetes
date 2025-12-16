@@ -20,13 +20,14 @@ Variables must be provided that match settings in ```~/.kube/config``` file:
 
 Role Variables
 --------------
-- **cnpg_cluster_name** — name of Helm App and prefix for all Kubernetes objects related to this cluster  
+- **cnpg_cluster_name** — name of Helm App and prefix for all Kubernetes objects related to this cluster (default cnpgdb)
+- **cnpg_cluster_external_hostname** — external DNS hostname used for accessing the database (default {{ cnpg_cluster_name }}.{{ k8s_namespace }}.dyn.cloud.e-infra.cz)
 - **cnpg_cluster_image** — container image name for cluster nodes, see [CNPG PostgreSQL Container Images](https://github.com/cloudnative-pg/postgres-containers/pkgs/container/postgresql) and [tagged versions](https://github.com/cloudnative-pg/postgres-containers/pkgs/container/postgresql/versions?filters%5Bversion_type%5D=tagged)
 - **cnpg_cluster_db_name** — name of database, default is "app"
 - **cnpg_cluster_db_owner** — database owner user, default is "app"
 - **cnpg_cluster_db_parameters** — options for [createdb](https://www.postgresql.org/docs/current/app-createdb.html#id-1.9.4.4.6), like ```encoding```, ```localeCType```, ```localeCollate```
 - **cnpg_cluster_postgresql_timezone** — timezone for server, affects SQL type [timestamp with timezone](https://www.postgresql.org/docs/current/datatype-datetime.html#DATATYPE-TIMEZONES), default is "Europe/Prague", use "Etc/UTC" for UTC
-- **cnpg_cluster_postgresql_parameters** - options for [postgresql.conf](https://cloudnative-pg.io/documentation/1.26/postgresql_conf/#the-postgresql-section)
+- **cnpg_cluster_postgresql_parameters** - options for [postgresql.conf](https://cloudnative-pg.io/documentation/current/postgresql_conf/#the-postgresql-section)
 - **cnpg_cluster_enable_superuser_access** — whether to enable access to user postgres from outside, default is true 
 - **cnpg_cluster_user_password** — password of db owner
 - **cnpg_cluster_pgwatch_user_password** — password for pgwatch user
@@ -52,7 +53,7 @@ Role Variables
 - **cnpg_cluster_backup_wal_compression** — [compression algorithm](https://cloudnative-pg.io/plugin-barman-cloud/docs/compression/) for WAL files (default zstd)
 - **cnpg_cluster_backup_data_compression** — [compression algorithm](https://cloudnative-pg.io/plugin-barman-cloud/docs/compression/) for full backups (default snappy)
 - **cnpg_cluster_ready_wait_seconds** — how many seconds to wait for cluster to become ready, default is 400 seconds
-- **cnpg_cluster_synchronous** — if defined, its content is added as spec/synchronous, see [Synchronous Replication](https://cloudnative-pg.io/documentation/1.26/replication/#synchronous-replication) 
+- **cnpg_cluster_synchronous** — if defined, its content is added as spec/synchronous, see [Synchronous Replication](https://cloudnative-pg.io/documentation/current/replication/#synchronous-replication) 
 - **cnpg_cluster_recovery** — if true, do a recovery from an S3 bucket specified by the `cnpg_cluster_s3_recovery_bucket` variable, default is false
 - **cnpg_cluster_s3_recovery_bucket** — the name of the S3 bucket with backup files, default is undefined 
 
@@ -85,8 +86,8 @@ Example
           method: any
           number: 1
           dataDurability: preferred
-        cnpg_cluster_image: ghcr.io/cloudnative-pg/postgresql:17.6-4-bookworm
-        cnpg_cluster_s3_bucket: mydbbackups
+        cnpg_cluster_image: ghcr.io/cloudnative-pg/postgresql:18.1-standard-trixie
+        cnpg_cluster_s3_bucket: mydb-backups
         cnpg_cluster_user_password: "{{ user_password_vault }}"
         cnpg_cluster_pgwatch_user_password: "{{ pgwatch_user_password_vault }}"
         cnpg_cluster_aws_access_key_id: "{{ aws_access_key_id_vault }}"

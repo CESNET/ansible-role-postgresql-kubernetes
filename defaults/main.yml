@@ -1,4 +1,5 @@
 cnpg_cluster_image: "ghcr.io/cloudnative-pg/postgresql:18.0-standard-trixie"
+cnpg_cluster_name: cnpgdb
 cnpg_cluster_db_name: app
 cnpg_cluster_db_owner: "{{ cnpg_cluster_db_name }}"
 cnpg_cluster_db_parameters: {}
@@ -38,7 +39,7 @@ cnpg_cluster_aws_region: "us-east-1"
 cnpg_cluster_backup_wal_compression: zstd
 cnpg_cluster_backup_data_compression: snappy
 cnpg_cluster_recovery: false
-
+cnpg_cluster_external_hostname: "{{ cnpg_cluster_name }}.{{ k8s_namespace }}.dyn.cloud.e-infra.cz"
 
 chart_clean_up_helm_dir: false
 chart_clean_up_secrets: true
