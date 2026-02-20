@@ -19,18 +19,20 @@ cnpg_sidecar_limits_cpu: 1
 cnpg_cluster_retention_policy: 3d
 cnpg_cluster_instances: 3
 cnpg_cluster_firewall_ports:
-  - { port: 5432, ipv4: "100.67.76.0/22", comment: "accept postgres from MUNI eduVPN ICS IPv4" }
-  - { port: 5432, ipv6: "2001:718:801:900:24c::/78", comment: "accept postgres from MUNI eduVPN ICS IPv6" }
-  - { port: 5432, ipv4: "78.128.246.160/32", comment: "accept postgres from CESNET eduVPN IPv4" }
-  - { port: 5432, ipv4: "78.128.247.175/32", comment: "accept postgres from CESNET eduVPN IPv4" }
-  - { port: 5432, ipv6: "2001:718:ff05:acb::/64", comment: "accept postgres from CESNET eduVPN IPv6" }
-  - { port: 5432, ipv6: "2001:718:ff05:acc::/64", comment: "accept postgres from CESNET eduVPN IPv6" }
-  - { port: 5432, ipv4: "195.113.196.6/32", comment: "accept postgres from CESNET 712 IPv4" }
-  - { port: 5432, ipv4: "195.113.196.134/32", comment: "accept postgres from CESNET 712 IPv4" }
-  - { port: 5432, ipv6: "2001:718:ff05:acb:a00:c4:6:0/112", comment: "accept postgres from CESNET 712 IPv6" }
-  - { port: 5432, ipv6: "2001:718:ff05:acc:b00:c4:86:0/112", comment: "accept postgres from CESNET 712 IPv6" }
-  - { port: 5432, ipv4: "78.128.247.148/32", comment: "accept postgres from psql-monitoring.perun-aai.org" }
-  - { port: 5432, ipv6: "2001:718:ff05:206::148/128", comment: "accept postgres from psql-monitoring.perun-aai.org" }
+  - { port: 5432, ipv4: "78.128.225.0/25", comment: "postgres from Gotex LAN IPv4" }
+  - { port: 5432, ipv6: "2001:718:812:27::/64", comment: "postgres from Gotex LAN IPv6" }
+  - { port: 5432, ipv4: "100.67.76.0/22", comment: "postgres from MUNI eduVPN ICS IPv4" }
+  - { port: 5432, ipv6: "2001:718:801:900:24c::/78", comment: "postgres from MUNI eduVPN ICS IPv6" }
+  - { port: 5432, ipv4: "78.128.246.160/32", comment: "postgres from CESNET eduVPN IPv4" }
+  - { port: 5432, ipv4: "78.128.247.175/32", comment: "postgres from CESNET eduVPN IPv4" }
+  - { port: 5432, ipv6: "2001:718:ff05:acb::/64", comment: "postgres from CESNET eduVPN IPv6" }
+  - { port: 5432, ipv6: "2001:718:ff05:acc::/64", comment: "postgres from CESNET eduVPN IPv6" }
+  - { port: 5432, ipv4: "195.113.196.6/32", comment: "postgres from CESNET 712 IPv4" }
+  - { port: 5432, ipv4: "195.113.196.134/32", comment: "postgres from CESNET 712 IPv4" }
+  - { port: 5432, ipv6: "2001:718:ff05:acb:a00:c4:6:0/112", comment: "postgres from CESNET 712 IPv6" }
+  - { port: 5432, ipv6: "2001:718:ff05:acc:b00:c4:86:0/112", comment: "postgres from CESNET 712 IPv6" }
+  - { port: 5432, ipv4: "78.128.247.148/32", comment: "postgres from psql-monitoring.perun-aai.org" }
+  - { port: 5432, ipv6: "2001:718:ff05:206::148/128", comment: "postgres from psql-monitoring.perun-aai.org" }
 cnpg_cluster_firewall_additional_ports: []
 cnpg_cluster_wal_keep_size: 2GB
 cnpg_cluster_full_backup_schedule:  "0 0 0 * * *"  # https://pkg.go.dev/github.com/robfig/cron#hdr-CRON_Expression_Format
