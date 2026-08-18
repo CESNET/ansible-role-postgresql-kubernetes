@@ -98,7 +98,7 @@
 - name: "fail if cluster is not archiving"
   when: not condition_archiving[0].status=="True"
   fail:
-    msg: "cluster backup is not working: {{ condition_archiving.message }}"
+    msg: "cluster backup is not working: {{ condition_archiving[0].message }}"
 
 - name: "print external JDBC URL"
   debug:
